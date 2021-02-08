@@ -5,7 +5,6 @@ from io import BytesIO
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
-from PIL import Image, ImageQt
 
 
 class Window(QWidget):
@@ -31,6 +30,14 @@ class Window(QWidget):
         self.radiobtn3.clicked.connect(self.set_mode)
         self.layout1.addWidget(self.radiobtn3)
 
+        self.layout1.addStretch()
+
+        self.input_edit = QLineEdit()
+        self.layout1.addWidget(self.input_edit)
+
+        self.search_btn = QPushButton('Искать')
+        self.layout1.addWidget(self.search_btn)
+
         self.mainlayout.addLayout(self.layout1)
         self.image = QLabel()
         self.mainlayout.addWidget(self.image)
@@ -41,6 +48,21 @@ class Window(QWidget):
         self.mode = 'map'
         self.new_map = True
         self.update()
+
+    def search(self):
+        search_url = "https://search-maps.yandex.ru/v1/"
+        api_key = "..."
+
+        address_ll = "37.588392,55.734036"
+
+        search_params = {
+            "apikey": api_key,
+            "text": "аптека",
+            "lang": "ru_RU",
+            "ll": address_ll,
+            "type": "biz"
+        }
+        response = requests.get(search_url, params=search_params)
 
     def set_mode(self):
         if self.radiobtn1.isChecked():
@@ -53,8 +75,9 @@ class Window(QWidget):
         self.update()
 
     def set_image(self, img):
-        self.ImageQt = ImageQt.ImageQt(Image.open(img))
-        self.image.setPixmap(QPixmap.fromImage(self.ImageQt))
+        image = QPixmap()
+        image.loadFromData(img.getvalue())
+        self.image.setPixmap(image)
 
     def paintEvent(self, event):
         if self.new_map:
@@ -77,19 +100,19 @@ class Window(QWidget):
         if event.key() == Qt.Key_PageDown:
             if self.delta >= 0.01:
                 self.delta = self.delta / 2
-        if event.key() == Qt.Key_Right:
+        if event.key() == Qt.Key_D:
             self.longitude += self.delta * 2
             if self.longitude >= 180:
                 self.longitude -= 360
-        if event.key() == Qt.Key_Left:
+        if event.key() == Qt.Key_A:
             self.longitude -= self.delta * 2
             if self.longitude < -180:
                 self.longitude += 360
-        if event.key() == Qt.Key_Up:
+        if event.key() == Qt.Key_W:
             self.lattitude += self.delta * 2
             if self.lattitude + self.delta > 90:
                 self.lattitude = 90 - self.delta
-        if event.key() == Qt.Key_Down:
+        if event.key() == Qt.Key_S:
             self.lattitude -= self.delta * 2
             if self.lattitude - self.delta < -90:
                 self.lattitude = -90 + self.delta
