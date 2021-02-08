@@ -16,7 +16,22 @@ class Window(QWidget):
     def initUI(self):
         self.setWindowTitle('Карта')
         self.mainlayout = QHBoxLayout(self)
+        self.layout1 = QVBoxLayout()
 
+        self.radiobtn1 = QRadioButton('Карта')
+        self.radiobtn1.setChecked(True)
+        self.radiobtn1.clicked.connect(self.set_mode)
+        self.layout1.addWidget(self.radiobtn1)
+
+        self.radiobtn2 = QRadioButton('Спутник')
+        self.radiobtn2.clicked.connect(self.set_mode)
+        self.layout1.addWidget(self.radiobtn2)
+
+        self.radiobtn3 = QRadioButton('Гибрид')
+        self.radiobtn3.clicked.connect(self.set_mode)
+        self.layout1.addWidget(self.radiobtn3)
+
+        self.mainlayout.addLayout(self.layout1)
         self.image = QLabel()
         self.mainlayout.addWidget(self.image)
 
@@ -24,6 +39,16 @@ class Window(QWidget):
         self.lattitude = 50
         self.delta = 20
         self.mode = 'map'
+        self.new_map = True
+        self.update()
+
+    def set_mode(self):
+        if self.radiobtn1.isChecked():
+            self.mode = 'map'
+        elif self.radiobtn2.isChecked():
+            self.mode = 'sat'
+        elif self.radiobtn3.isChecked():
+            self.mode = 'sat,skl'
         self.new_map = True
         self.update()
 
