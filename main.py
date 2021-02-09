@@ -39,6 +39,10 @@ class Window(QWidget):
         self.search_btn.clicked.connect(self.search)
         self.layout1.addWidget(self.search_btn)
 
+        self.clear_btn = QPushButton('Сброс поискового результата')
+        self.clear_btn.clicked.connect(self.clear)
+        self.layout1.addWidget(self.clear_btn)
+
         self.mainlayout.addLayout(self.layout1)
         self.image = QLabel()
         self.mainlayout.addWidget(self.image)
@@ -70,6 +74,11 @@ class Window(QWidget):
         self.is_pt = True
         self.pt_x = self.longitude
         self.pt_y = self.lattitude
+        self.new_map = True
+        self.update()
+
+    def clear(self):
+        self.is_pt = False
         self.new_map = True
         self.update()
 
