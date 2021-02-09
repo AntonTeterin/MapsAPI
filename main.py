@@ -35,6 +35,9 @@ class Window(QWidget):
         self.input_edit = QLineEdit()
         self.layout1.addWidget(self.input_edit)
 
+        self.post_index = QCheckBox('Добавить к адресу почтовый индекс')
+        self.layout1.addWidget(self.post_index)
+
         self.search_btn = QPushButton('Искать')
         self.search_btn.clicked.connect(self.search)
         self.layout1.addWidget(self.search_btn)
@@ -78,8 +81,13 @@ class Window(QWidget):
         self.is_pt = True
         self.pt_x = self.longitude
         self.pt_y = self.lattitude
-        self.adr_edit.setText(
-            toponym["metaDataProperty"]["GeocoderMetaData"]["text"])
+        text = toponym["metaDataProperty"]["GeocoderMetaData"]["text"]
+        if self.post_index.isChecked():
+            postal_code = toponym["metaDataProperty"]["GeocoderMetaData"]["Address"].get(
+                "postal_code", False)
+            if postal_code:
+                text += f', {postal_code}'
+        self.adr_edit.setText(text)
         self.new_map = True
         self.update()
 
