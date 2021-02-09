@@ -43,6 +43,10 @@ class Window(QWidget):
         self.clear_btn.clicked.connect(self.clear)
         self.layout1.addWidget(self.clear_btn)
 
+        self.layout1.addWidget(QLabel('Адрес:'))
+        self.adr_edit = QLineEdit()
+        self.layout1.addWidget(self.adr_edit)
+
         self.mainlayout.addLayout(self.layout1)
         self.image = QLabel()
         self.mainlayout.addWidget(self.image)
@@ -74,11 +78,14 @@ class Window(QWidget):
         self.is_pt = True
         self.pt_x = self.longitude
         self.pt_y = self.lattitude
+        self.adr_edit.setText(
+            toponym["metaDataProperty"]["GeocoderMetaData"]["text"])
         self.new_map = True
         self.update()
 
     def clear(self):
         self.is_pt = False
+        self.adr_edit.clear()
         self.new_map = True
         self.update()
 
