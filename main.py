@@ -36,6 +36,7 @@ class Window(QWidget):
         self.layout1.addWidget(self.input_edit)
 
         self.post_index = QCheckBox('Добавить к адресу почтовый индекс')
+        self.post_index.clicked.connect(self.set_text)
         self.layout1.addWidget(self.post_index)
 
         self.search_btn = QPushButton('Искать')
@@ -56,9 +57,11 @@ class Window(QWidget):
 
         self.longitude = 10
         self.lattitude = 50
-        self.delta = 20
+        self.delta_x = 20
+        self.delta_y = 20
         self.mode = 'map'
         self.is_pt = False
+        self.toponym = None
         self.new_map = True
         self.update()
 
@@ -70,24 +73,21 @@ class Window(QWidget):
             "format": "json"}
 
         response = requests.get(geocoder_api_server, params=geocoder_params)
+        if not response:
+            self.input_edit.setText('Ничего не найдено')
+            return
         response = response.json()["response"]["GeoObjectCollection"][
             "featureMember"]
         if not response:
             self.input_edit.setText('Ничего не найдено')
             return
-        toponym = response[0]["GeoObject"]
-        res = [float(x) for x in self.get_coordinates(toponym)]
-        self.longitude, self.lattitude, self.delta = res
+        self.toponym = response[0]["GeoObject"]
+        res = [float(x) for x in self.get_coordinates(self.toponym)]
+        self.longitude, self.lattitude, self.delta_x, self.delta_y = res
         self.is_pt = True
         self.pt_x = self.longitude
         self.pt_y = self.lattitude
-        text = toponym["metaDataProperty"]["GeocoderMetaData"]["text"]
-        if self.post_index.isChecked():
-            postal_code = toponym["metaDataProperty"]["GeocoderMetaData"]["Address"].get(
-                "postal_code", False)
-            if postal_code:
-                text += f', {postal_code}'
-        self.adr_edit.setText(text)
+        self.set_text()
         self.new_map = True
         self.update()
 
@@ -112,12 +112,23 @@ class Window(QWidget):
         image.loadFromData(img.getvalue())
         self.image.setPixmap(image)
 
+    def set_text(self):
+        if self.toponym is not None:
+            text = self.toponym["metaDataProperty"]["GeocoderMetaData"]["text"]
+            if self.post_index.isChecked():
+                postal_code = self.toponym["metaDataProperty"]["GeocoderMetaData"]["Address"].get(
+                    "postal_code", False)
+                if postal_code:
+                    text += f', {postal_code}'
+            self.adr_edit.setText(text)
+
     def get_coordinates(self, toponym):
         x, y = toponym["Point"]["pos"].split()
         left, down = toponym["boundedBy"]["Envelope"]["lowerCorner"].split()
         right, up = toponym["boundedBy"]["Envelope"]["upperCorner"].split()
-        delta = str(abs(float(right) - float(left)))
-        return x, y, delta
+        delta_x = str(abs(float(right) - float(left)))
+        delta_y = str(abs(float(up) - float(down)))
+        return x, y, delta_x, delta_y
 
     def paintEvent(self, event):
         if self.new_map:
@@ -126,9 +137,9 @@ class Window(QWidget):
             map_params = {
                 'apikey': '40d1649f-0493-4b70-98ba-98533de7710b',
                 'll': ','.join([str(self.longitude), str(self.lattitude)]),
-                'spn': ','.join([str(self.delta), str(self.delta)]),
+                'spn': ','.join([str(self.delta_x), str(self.delta_y)]),
                 'l': self.mode,
-                'size': '450,450'
+                'size': '650,450'
             }
             if self.is_pt:
                 map_params['pt'] = ','.join(
@@ -138,27 +149,29 @@ class Window(QWidget):
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_PageUp:
-            if self.delta <= 40:
-                self.delta = self.delta * 2
+            if self.delta_x <= 40 and self.delta_y <= 40:
+                self.delta_x = self.delta_x * 2
+                self.delta_y = self.delta_y * 2
         if event.key() == Qt.Key_PageDown:
-            if self.delta >= 0.01:
-                self.delta = self.delta / 2
+            if self.delta_x >= 0.01 and self.delta_y >= 0.01:
+                self.delta_x = self.delta_x / 2
+                self.delta_y = self.delta_y / 2
         if event.key() == Qt.Key_D:
-            self.longitude += self.delta * 2
+            self.longitude += self.delta_x
             if self.longitude >= 180:
                 self.longitude -= 360
         if event.key() == Qt.Key_A:
-            self.longitude -= self.delta * 2
+            self.longitude -= self.delta_x
             if self.longitude < -180:
                 self.longitude += 360
         if event.key() == Qt.Key_W:
-            self.lattitude += self.delta * 2
-            if self.lattitude + self.delta > 90:
-                self.lattitude = 90 - self.delta
+            self.lattitude += self.delta_y
+            if self.lattitude + self.delta_y / 2 > 90:
+                self.lattitude = 90 - self.delta_y / 2
         if event.key() == Qt.Key_S:
-            self.lattitude -= self.delta * 2
-            if self.lattitude - self.delta < -90:
-                self.lattitude = -90 + self.delta
+            self.lattitude -= self.delta_y
+            if self.lattitude - self.delta_y / 2 < -90:
+                self.lattitude = -90 + self.delta_y / 2
         self.new_map = True
         self.update()
 
