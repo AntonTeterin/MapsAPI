@@ -134,7 +134,7 @@ class Window(QWidget):
                     "postal_code", False)
                 if postal_code:
                     text += f', {postal_code}'
-            self.adr_edit.setText(text)
+            self.input_edit.setText(text)
 
     def get_coordinates(self, toponym):
         x, y = toponym["Point"]["pos"].split()
