@@ -107,7 +107,7 @@ class Window(QWidget):
 
     def clear(self):
         self.is_pt = False
-        self.adr_edit.clear()
+        self.input_edit.clear()
         self.new_map = True
         self.update()
 
