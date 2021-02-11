@@ -14,8 +14,19 @@ class Window(QWidget):
 
     def initUI(self):
         self.setWindowTitle('Карта')
-        self.mainlayout = QHBoxLayout(self)
-        self.layout1 = QVBoxLayout()
+        self.mainlayout = QVBoxLayout(self)
+
+        self.layout0 = QHBoxLayout()
+        self.layout0.addStretch()
+
+        self.image = QLabel()
+        self.layout0.addWidget(self.image)
+
+        self.layout0.addStretch()
+        self.mainlayout.addLayout(self.layout0)
+
+        self.layout1 = QHBoxLayout()
+        self.layout1.addStretch()
 
         self.radiobtn1 = QRadioButton('Карта')
         self.radiobtn1.setChecked(True)
@@ -30,30 +41,33 @@ class Window(QWidget):
         self.radiobtn3.clicked.connect(self.set_mode)
         self.layout1.addWidget(self.radiobtn3)
 
-        self.layout1.addStretch()
-
-        self.input_edit = QLineEdit()
-        self.layout1.addWidget(self.input_edit)
-
-        self.post_index = QCheckBox('Добавить к адресу почтовый индекс')
+        self.post_index = QCheckBox('Добавить почтовый индекс')
         self.post_index.clicked.connect(self.set_text)
         self.layout1.addWidget(self.post_index)
 
+        self.layout1.addStretch()
+        self.mainlayout.addLayout(self.layout1)
+
+        self.layout2 = QHBoxLayout()
+        self.layout2.addStretch()
+
+        self.input_edit = QLineEdit()
+        self.layout2.addWidget(self.input_edit)
+
         self.search_btn = QPushButton('Искать')
         self.search_btn.clicked.connect(self.search)
-        self.layout1.addWidget(self.search_btn)
+        self.layout2.addWidget(self.search_btn)
 
-        self.clear_btn = QPushButton('Сброс поискового результата')
+        self.clear_btn = QPushButton('Сброс результата')
         self.clear_btn.clicked.connect(self.clear)
-        self.layout1.addWidget(self.clear_btn)
+        self.layout2.addWidget(self.clear_btn)
 
-        self.layout1.addWidget(QLabel('Адрес:'))
-        self.adr_edit = QLineEdit()
-        self.layout1.addWidget(self.adr_edit)
+        # self.layout2.addWidget(QLabel('Адрес:'))
+        # self.adr_edit = QLineEdit()
+        # self.layout2.addWidget(self.adr_edit)
 
-        self.mainlayout.addLayout(self.layout1)
-        self.image = QLabel()
-        self.mainlayout.addWidget(self.image)
+        self.layout2.addStretch()
+        self.mainlayout.addLayout(self.layout2)
 
         self.longitude = 10
         self.lattitude = 50
